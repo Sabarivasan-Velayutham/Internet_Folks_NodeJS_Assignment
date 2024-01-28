@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const { generateId } = require('../utils/snowflake');
+const mongoose = require("mongoose");
+const { generateId } = require("../utils/snowflake");
 
 const userSchema = new mongoose.Schema({
   _id: {
     type: String,
     required: true,
-    default: generateId()
+    default: generateId(),
   },
   name: {
     type: String,
@@ -26,9 +26,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-
-
-
 module.exports = {
-  User: mongoose.model('User', userSchema),
+  User: mongoose.model("User", userSchema),
 };

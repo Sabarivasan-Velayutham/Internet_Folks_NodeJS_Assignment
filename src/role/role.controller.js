@@ -1,30 +1,47 @@
-const {Role} = require('./role.model');
-let Validator = require('validatorjs');
+const { Role } = require("./role.model");
+let Validator = require("validatorjs");
 
-
-async function createRole(req, res){
-    const { name } = req.body;
+async function createRole(req, res) {
+  const { name } = req.body;
 
   const rules = {
-    name: 'required|min:2',
+    name: "required|min:2",
   };
   const validation = new Validator(req.body, rules);
   if (validation.fails()) {
-    return res.status(400).json({ error: validation.errors.all() });
+    const errors = validation.errors.all();
+    const formattedErrors = Object.keys(errors).map((param) => ({
+      param,
+      message: errors[param][0],
+      code: "INVALID_INPUT",
+    }));
+
+    return res.status(400).json({
+      status: false,
+      errors: formattedErrors,
+    });
   }
 
   const role = new Role({
-    name
+    name,
   });
   await role.save();
 
-  res.json({ name: role.name });
+  res.status(201).json({
+    status: true,
+    content: {
+      data: {
+        id: role._id,
+        name: role.name,
+        created_at: role.created_at,
+        updated_at: role.updated_at,
+      },
+    },
+  });
 }
 
-
-
-async function getAllRole(req, res){
-    const { page = 1, limit = 10 } = req.query;
+async function getAllRole(req, res) {
+  const { page = 1, limit = 10 } = req.query;
 
   const total = await Role.countDocuments();
 
@@ -35,14 +52,24 @@ async function getAllRole(req, res){
     .skip((currentPage - 1) * limit)
     .limit(parseInt(limit));
 
+  const formattedRoles = roles.map((role) => ({
+    id: role._id,
+    name: role.name,
+    created_at: role.created_at,
+    updated_at: role.updated_at,
+  }));
+
   res.json({
-    data: roles,
-    meta: {
-      total,
-      pages,
-      page: currentPage,
+    status: true,
+    content: {
+      meta: {
+        total,
+        pages,
+        page: currentPage,
+      },
+      data: formattedRoles,
     },
   });
 }
 
-module.exports = {createRole, getAllRole};
+module.exports = { createRole, getAllRole };

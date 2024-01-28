@@ -6,6 +6,4 @@ const roleController = require('./role.controller');
 roleRouter.post('/', roleController.createRole)
 roleRouter.get('/', roleController.getAllRole)
 
-    
-
 module.exports = roleRouter;
